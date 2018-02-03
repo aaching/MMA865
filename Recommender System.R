@@ -4,6 +4,8 @@ library(stringr)
 library(sparklyr)
 library(data.table)
 library(plyr)
+library(dplyr)
+
 
 in_path = '/global/project/queens-mma/scene2018/sample02/'
 
@@ -67,17 +69,7 @@ SP_QualityActivity = fread(paste(in_path, file_name, sep=""), sep=",", header=TR
 file_name = 'SceneAnalytics.dbo.SP_Source.csv'
 SP_Source = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-library(tidyverse)
-library(lubridate)
-library(stringr)
-library(sparklyr)
-library(data.table)
-library(plyr)
-library(dplyr)
-#install.packages("sqldf")
-library(sqldf)
-
-#Create Data Universe
+#create universe
 
 universe1 <- SP_AccountBalance %>%
   inner_join(SP_FactEnrollment, by = "Unique_member_identifier") %>%
@@ -98,9 +90,13 @@ universe2 <- universe1 %>%
          , isPrePaid, isActive, OpensEmail_tendancy, RedemptionYearToDate, RedemptionProgramToDate
          , isQuality, isMarketable, isReachable, hasActivity)
 
+#Universe 3
 universe3 <- universe2 %>%
+  #black card + email enrolled
   filter(isActive == TRUE) %>%
+  #black card active
   filter(hasActivity == TRUE) %>%
+  #keep only the UMI column
   select(Unique_member_identifier)
 
 
@@ -108,17 +104,19 @@ universe3 <- universe2 %>%
 # transactions by Customer to each Cara Partner, Total Transactions, and Scale (=Frequency of Transactions/Total Transactions)
 
 t1 <- SP_Points %>%
+  #E-inner join with starting universe
+  inner_join(universe3, by="Unique_member_identifier") %>%
   #deduplicated LocationCode, as it seemed like there were multiple locations associated with one location code
   #inner join Cara locations and earn transactions
   inner_join(SP_DimProxyLocation[!duplicated(SP_DimProxyLocation$LocationCode),], by = c("ex_sourceid" = "LocationCode")) %>%
   #select only the following columns: UMI, Points, ex_sourceid (ie. Location Code), BrandeCode and date of transaction
   select(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt) %>%
   #inner join the Quality of Activity 
-  inner_join(SP_QualityActivity, by="Unique_member_identifier")%>%
+  # inner_join(SP_QualityActivity, by="Unique_member_identifier")%>%
   #filter for all point earning transaction (when points > 0)
   filter(points>0)%>%
   #filter for active Black Card members in the last 12 months
-  filter(hasActivity==TRUE)%>%
+  #  filter(hasActivity==TRUE)%>%
   #remove all duplicated values in the same day at the same time
   distinct(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt)
 
@@ -129,6 +127,7 @@ t2 <- group_by(t1,Unique_member_identifier)%>%
   summarise(tot=n())%>%
   filter(tot>5)
 
+#distribution of all transactions
 #Create a new column with the total number of transactions by each customer for each cara partner
 t3 <- group_by(t1,Unique_member_identifier,BrandCode)%>%
   summarise(each=n())
@@ -152,7 +151,7 @@ ratings<-inner_join(t3,t2,by="Unique_member_identifier")%>%
   group_by(BrandCode) %>% 
   mutate(item = group_number2())
 
-#mutate(user = match(Unique_member_identifier, unique(Unique_member_identifier)),item = match(BrandCode, unique(BrandCode)))
+  #mutate(user = match(Unique_member_identifier, unique(Unique_member_identifier)),item = match(BrandCode, unique(BrandCode)))
 
 #Start building recommender engine
 
@@ -184,11 +183,12 @@ real_ratings
 model <- Recommender(real_ratings, method = "POPULAR", param=list(normalize = "center"))
 
 prediction <- predict(model, real_ratings[1:5], type="ratings")
-as(prediction, "matrix")[,1:5]
+as(prediction, "matrix")[,1:10]
+#max of [1:9]
 
-set.seed(1)
-e <- evaluationScheme(real_ratings, method="split", train=0.8, given=-5)
-#5 ratings of 20% of users are excluded for testing
+set.seed(5)
+e <- evaluationScheme(real_ratings, method="split", train=0.8, given=-1)
+#5 ratings of 20% of users are excluded for testing, try with 70/30
 
 model <- Recommender(getData(e, "train"), "POPULAR")
 prediction <- predict(model, getData(e, "known"), type="ratings")
@@ -198,8 +198,14 @@ rmse_popular
 
 #CF - User Based
 
+#model <- Recommender(real_ratings, method = "UBCF", 
+#                     param=list(normalize = "center", method="Cosine", nn=50))
+
 model <- Recommender(real_ratings, method = "UBCF", 
-                     param=list(normalize = "center", method="Cosine", nn=50))
+                     param=list(normalize = "center", method="Jaccard", nn=50))
+
+model <- Recommender(real_ratings, method = "UBCF", 
+                     param=list(normalize = "center", method="Pearson", nn=50))
 
 prediction <- predict(model, real_ratings[1:5], type="ratings")
 as(prediction, "matrix")[,1:5]
@@ -207,10 +213,44 @@ as(prediction, "matrix")[,1:5]
 #Estimating RMSE
 set.seed(1)
 
-model <- Recommender(getData(e, "train"), method = "UBCF", 
-                     param=list(normalize = "center", method="Cosine", nn=50))
+#model <- Recommender(getData(e, "train"), method = "UBCF", 
+#                     param=list(normalize = "center", method="Cosine", nn=50))
 
+#try jacquardian distance
+set.seed(1)
 prediction <- predict(model, getData(e, "known"), type="ratings")
 
 rmse_ubcf <- calcPredictionAccuracy(prediction, getData(e, "unknown"))[1]
 rmse_ubcf
+
+#recosystem
+
+data(ratings)
+
+set.seed(1)
+in_train <- rep(TRUE, nrow(ratings))
+in_train[sample(1:nrow(ratings), size = round(0.2 * length(unique(ratings$user)), 0) * 5)] <- FALSE
+
+ratings_train <- ratings[(in_train)]
+ratings_test <- ratings[(!in_train)]
+
+write.table(ratings_train, file = "trainset.txt", sep = " ", row.names = FALSE, col.names = FALSE)
+write.table(ratings_test, file = "testset.txt", sep = " ", row.names = FALSE, col.names = FALSE)
+
+r = Reco()
+
+opts <- r$tune("trainset.txt", opts = list(dim = c(1:20), lrate = c(0.05),
+                                           nthread = 4, cost = c(0), niter = 200, nfold = 10, verbose = FALSE))
+
+r$train("trainset.txt", opts = c(opts$min, nthread = 4, niter = 500, verbose = FALSE))
+
+outfile = tempfile()
+
+r$predict("testset.txt", outfile)
+
+scores_real <- read.table("testset.txt", header = FALSE, sep = " ")$V3
+scores_pred <- scan(outfile)
+
+rmse_mf <- sqrt(mean((scores_real-scores_pred) ^ 2))
+
+rmse_mf
