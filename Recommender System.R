@@ -7,70 +7,53 @@ library(plyr)
 library(dplyr)
 
 
-in_path = '/global/project/queens-mma/scene2018/sample02/'
+#in_path = '/global/project/queens-mma/scene2018/sample02/'
 
-file_name = 'SceneAnalytics.dbo.LK_account_unique_member_identifier_sample10.csv'
-LK_account_unique_member_identifier_sample10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+#file_name = 'SceneAnalytics.dbo.LK_account_unique_member_identifier_sample10.csv'
+#LK_account_unique_member_identifier_sample10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-file_name = 'SceneAnalytics.dbo.SP_AccountBalance.csv'
-SP_AccountBalance = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
-
+SP_AccountBalance <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_AccountBalance.csv")
 file_name = 'SceneAnalytics.SP_AccountHistory.csv'
-SP_AccountHistory = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-file_name = 'SceneAnalytics.dbo.SP_AccountHistoryType.csv'
-SP_AccountHistoryType = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_AccountHistory <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_AccountHistory.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_ActivityStatusScotiaScene_E.csv'
-SP_ActivityStatusScotiaScene_E = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_AccountHistoryType <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_AccountHistoryType.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_CineplexStore.csv'
-SP_CineplexStore = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_ActivityStatusScotiaScene_E <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_ActivityStatusScotiaScene_E.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_CustomerDetail.csv'
-SP_CustomerDetail = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_CineplexStore <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_CineplexStore.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_CustomerExtension.csv'
-SP_CustomerExtension = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_CustomerDetail <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_CustomerDetail.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_DimProxyLocation.csv'
-SP_DimProxyLocation = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_CustomerExtension <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_CustomerExtension.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_FactAttribute.csv'
-SP_FactAttribute = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_DimProxyLocation <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_DimProxyLocation.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_FactEnrollment.csv'
-SP_FactEnrollment = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_FactAttribute <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_FactAttribute.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_LocationCARA.csv'
-SP_LocationCARA = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_FactEnrollment <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_FactEnrollment.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_Location.csv'
-SP_Location = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_LocationCARA <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_LocationCARA.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_Partner_E.csv'
-SP_Partner_E = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_Location <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Location.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_Points.csv'
-SP_Points = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_Partner_E <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Partner_E.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_PointsType.csv'
-SP_PointsType = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_Points<- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Points.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_PointTypeStatistics.csv'
-SP_PointTypeStatistics = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_PointsType <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_PointsType.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_ProxyPointTransaction_10.csv'
-SP_ProxyPointTransaction_10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_PointTypeStatistics <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_PointTypeStatistics.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_QualityActivity.csv'
-SP_QualityActivity = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_ProxyPointTransaction_10 <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_ProxyPointTransaction_10.csv")
 
-file_name = 'SceneAnalytics.dbo.SP_Source.csv'
-SP_Source = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+SP_QualityActivity <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_QualityActivity.csv")
+
+SP_Source <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Source.csv")
 
 #create universe
 
+#Create Universe 1, which essentially aggregates all the customer dimensions we care about (Account Balance, Enrollment metrics and Attributes)
 universe1 <- SP_AccountBalance %>%
   inner_join(SP_FactEnrollment, by = "Unique_member_identifier") %>%
   select(Unique_member_identifier, Points, AccountCloseKey, isBNS, isVCL, isPrePaid) %>%
@@ -78,12 +61,14 @@ universe1 <- SP_AccountBalance %>%
   select(Unique_member_identifier, Points, AccountCloseKey, isBNS, isVCL, isPrePaid
          , isActive, OpensEmail_tendancy, RedemptionYearToDate, RedemptionProgramToDate)
 
+#The latest month of activity
 qual_last_mo <- SP_QualityActivity %>%
   summarize(max_date = max(ActivityMonth))
 
 QualAct_new <- SP_QualityActivity %>%
   filter(ActivityMonth == as.integer(qual_last_mo))
 
+#joined Quality Activity with universe 1 
 universe2 <- universe1 %>%
   inner_join(QualAct_new, by = "Unique_member_identifier") %>%
   select(Unique_member_identifier, Points, AccountCloseKey, isBNS, isVCL
@@ -110,26 +95,35 @@ t1 <- SP_Points %>%
   #inner join Cara locations and earn transactions
   inner_join(SP_DimProxyLocation[!duplicated(SP_DimProxyLocation$LocationCode),], by = c("ex_sourceid" = "LocationCode")) %>%
   #select only the following columns: UMI, Points, ex_sourceid (ie. Location Code), BrandeCode and date of transaction
-  select(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt) %>%
+  select(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt,pointtypeid)%>%
   #inner join the Quality of Activity 
   # inner_join(SP_QualityActivity, by="Unique_member_identifier")%>%
   #filter for all point earning transaction (when points > 0)
   filter(points>0)%>%
+  #filter for all CARA activity only
+  filter(pointtypeid==1282)%>%
   #filter for active Black Card members in the last 12 months
   #  filter(hasActivity==TRUE)%>%
   #remove all duplicated values in the same day at the same time
-  distinct(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt)
+  distinct(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt)%>%
+  arrange(Unique_member_identifier)%>%
+  na.omit()
 
 detach("package:plyr", unload=TRUE) 
 
 #Create a new column with the total number of transactions by each customer
 t2 <- group_by(t1,Unique_member_identifier)%>%
-  summarise(tot=n())%>%
-  filter(tot>5)
+  arrange(Unique_member_identifier)%>%
+  summarise(tot=n(),count=n_distinct(BrandCode))%>%
+  filter(tot>5)%>%
+  filter(count>3)%>%
+  na.omit()
 
 #distribution of all transactions
 #Create a new column with the total number of transactions by each customer for each cara partner
 t3 <- group_by(t1,Unique_member_identifier,BrandCode)%>%
+  arrange(Unique_member_identifier)%>%
+  na.omit()%>%
   summarise(each=n())
 
 #I believe we had to make the user ID's a descending value from 1 onwards... this is what the functions are for
@@ -151,7 +145,7 @@ ratings<-inner_join(t3,t2,by="Unique_member_identifier")%>%
   group_by(BrandCode) %>% 
   mutate(item = group_number2())
 
-  #mutate(user = match(Unique_member_identifier, unique(Unique_member_identifier)),item = match(BrandCode, unique(BrandCode)))
+#mutate(user = match(Unique_member_identifier, unique(Unique_member_identifier)),item = match(BrandCode, unique(BrandCode)))
 
 #Start building recommender engine
 
@@ -183,7 +177,7 @@ real_ratings
 model <- Recommender(real_ratings, method = "POPULAR", param=list(normalize = "center"))
 
 prediction <- predict(model, real_ratings[1:5], type="ratings")
-as(prediction, "matrix")[,1:10]
+as(prediction, "matrix")[,1:9]
 #max of [1:9]
 
 set.seed(5)
@@ -198,8 +192,8 @@ rmse_popular
 
 #CF - User Based
 
-#model <- Recommender(real_ratings, method = "UBCF", 
-#                     param=list(normalize = "center", method="Cosine", nn=50))
+model <- Recommender(real_ratings, method = "UBCF", 
+                    param=list(normalize = "center", method="Cosine", nn=50))
 
 model <- Recommender(real_ratings, method = "UBCF", 
                      param=list(normalize = "center", method="Jaccard", nn=50))
@@ -207,16 +201,14 @@ model <- Recommender(real_ratings, method = "UBCF",
 model <- Recommender(real_ratings, method = "UBCF", 
                      param=list(normalize = "center", method="Pearson", nn=50))
 
-prediction <- predict(model, real_ratings[1:5], type="ratings")
-as(prediction, "matrix")[,1:5]
+prediction <- predict(model, real_ratings[1:10], type="ratings")
+as(prediction, "matrix")[,1:9]
 
 #Estimating RMSE
-set.seed(1)
 
 #model <- Recommender(getData(e, "train"), method = "UBCF", 
 #                     param=list(normalize = "center", method="Cosine", nn=50))
 
-#try jacquardian distance
 set.seed(1)
 prediction <- predict(model, getData(e, "known"), type="ratings")
 
