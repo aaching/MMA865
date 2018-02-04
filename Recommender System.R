@@ -7,49 +7,68 @@ library(plyr)
 library(dplyr)
 
 
-#in_path = '/global/project/queens-mma/scene2018/sample02/'
+in_path = '/global/project/queens-mma/scene2018/sample02/'
 
-#file_name = 'SceneAnalytics.dbo.LK_account_unique_member_identifier_sample10.csv'
-#LK_account_unique_member_identifier_sample10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+file_name = 'SceneAnalytics.dbo.LK_account_unique_member_identifier_sample10.csv'
+LK_account_unique_member_identifier_sample10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_AccountBalance <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_AccountBalance.csv")
+file_name = 'SceneAnalytics.dbo.SP_AccountBalance.csv'
+SP_AccountBalance = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
+
 file_name = 'SceneAnalytics.SP_AccountHistory.csv'
+SP_AccountHistory = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_AccountHistory <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_AccountHistory.csv")
+file_name = 'SceneAnalytics.dbo.SP_AccountHistoryType.csv'
+SP_AccountHistoryType = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_AccountHistoryType <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_AccountHistoryType.csv")
+file_name = 'SceneAnalytics.dbo.SP_ActivityStatusScotiaScene_E.csv'
+SP_ActivityStatusScotiaScene_E = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_ActivityStatusScotiaScene_E <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_ActivityStatusScotiaScene_E.csv")
+file_name = 'SceneAnalytics.dbo.SP_CineplexStore.csv'
+SP_CineplexStore = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_CineplexStore <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_CineplexStore.csv")
+file_name = 'SceneAnalytics.dbo.SP_CustomerDetail.csv'
+SP_CustomerDetail = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_CustomerDetail <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_CustomerDetail.csv")
+file_name = 'SceneAnalytics.dbo.SP_CustomerExtension.csv'
+SP_CustomerExtension = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_CustomerExtension <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_CustomerExtension.csv")
+file_name = 'SceneAnalytics.dbo.SP_DimProxyLocation.csv'
+SP_DimProxyLocation = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_DimProxyLocation <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_DimProxyLocation.csv")
+file_name = 'SceneAnalytics.dbo.SP_FactAttribute.csv'
+SP_FactAttribute = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_FactAttribute <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_FactAttribute.csv")
+file_name = 'SceneAnalytics.dbo.SP_FactEnrollment.csv'
+SP_FactEnrollment = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_FactEnrollment <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_FactEnrollment.csv")
+file_name = 'SceneAnalytics.dbo.SP_LocationCARA.csv'
+SP_LocationCARA = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_LocationCARA <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_LocationCARA.csv")
+file_name = 'SceneAnalytics.dbo.SP_Location.csv'
+SP_Location = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_Location <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Location.csv")
+file_name = 'SceneAnalytics.dbo.SP_Partner_E.csv'
+SP_Partner_E = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_Partner_E <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Partner_E.csv")
+file_name = 'SceneAnalytics.dbo.SP_Points.csv'
+SP_Points = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_Points<- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Points.csv")
+file_name = 'SceneAnalytics.dbo.SP_PointsType.csv'
+SP_PointsType = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_PointsType <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_PointsType.csv")
+file_name = 'SceneAnalytics.dbo.SP_PointTypeStatistics.csv'
+SP_PointTypeStatistics = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_PointTypeStatistics <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_PointTypeStatistics.csv")
+file_name = 'SceneAnalytics.dbo.SP_ProxyPointTransaction_10.csv'
+SP_ProxyPointTransaction_10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_ProxyPointTransaction_10 <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_ProxyPointTransaction_10.csv")
+file_name = 'SceneAnalytics.dbo.SP_QualityActivity.csv'
+SP_QualityActivity = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_QualityActivity <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_QualityActivity.csv")
+file_name = 'SceneAnalytics.dbo.SP_Source.csv'
+SP_Source = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
-SP_Source <- read_csv("~/sample02/sample02/SceneAnalytics.dbo.SP_Source.csv")
 
 #create universe
 
