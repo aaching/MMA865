@@ -7,7 +7,7 @@ library(plyr)
 library(dplyr)
 
 
-in_path = '/global/project/queens-mma/scene2018/sample02/'
+in_path = '/global/project/queens-mma/scene2018/sample04/'
 
 file_name = 'SceneAnalytics.dbo.LK_account_unique_member_identifier_sample10.csv'
 LK_account_unique_member_identifier_sample10 = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
@@ -70,7 +70,12 @@ file_name = 'SceneAnalytics.dbo.SP_Source.csv'
 SP_Source = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 
 
-#create universe
+#Updated by Evert 2/5
+# 1-updated to use sample04 data
+# 2-recosystem at bottom now works 
+# 3-RMSE added to each result to compare
+# 4-checked for data quality. Looks good.. but simply too few people are active enough at Cara for good data
+
 
 #Create Universe 1, which essentially aggregates all the customer dimensions we care about (Account Balance, Enrollment metrics and Attributes)
 universe1 <- SP_AccountBalance %>%
@@ -97,7 +102,7 @@ universe2 <- universe1 %>%
 #Universe 3
 universe3 <- universe2 %>%
   #black card + email enrolled
-  filter(isActive == TRUE) %>%
+  ##filter(isActive == TRUE) %>%
   #black card active
   filter(hasActivity == TRUE) %>%
   #keep only the UMI column
@@ -108,39 +113,40 @@ universe3 <- universe2 %>%
 # transactions by Customer to each Cara Partner, Total Transactions, and Scale (=Frequency of Transactions/Total Transactions)
 
 t1 <- SP_Points %>%
-  #E-inner join with starting universe
+  #only include chosen universe
   inner_join(universe3, by="Unique_member_identifier") %>%
   #deduplicated LocationCode, as it seemed like there were multiple locations associated with one location code
   #inner join Cara locations and earn transactions
   inner_join(SP_DimProxyLocation[!duplicated(SP_DimProxyLocation$LocationCode),], by = c("ex_sourceid" = "LocationCode")) %>%
-  #select only the following columns: UMI, Points, ex_sourceid (ie. Location Code), BrandeCode and date of transaction
-  select(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt,pointtypeid)%>%
-  #inner join the Quality of Activity 
-  # inner_join(SP_QualityActivity, by="Unique_member_identifier")%>%
+  #select only the following columns: UMI, Points, ex_sourceid (ie. Location Code), BrandCode and date of transaction
+  select(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt,pointtypeid)
+  
+  t2 <- t1 %>% 
   #filter for all point earning transaction (when points > 0)
   filter(points>0)%>%
   #filter for all CARA activity only
   filter(pointtypeid==1282)%>%
-  #filter for active Black Card members in the last 12 months
-  #  filter(hasActivity==TRUE)%>%
   #remove all duplicated values in the same day at the same time
   distinct(Unique_member_identifier, points, ex_sourceid, BrandCode,pointdt)%>%
   arrange(Unique_member_identifier)%>%
-  na.omit()
+  na.omit() #63762 collectors left now
 
 detach("package:plyr", unload=TRUE) 
 
-#Create a new column with the total number of transactions by each customer
-t2 <- group_by(t1,Unique_member_identifier)%>%
+#Create a new column with the total number of transactions by each customer, and new column with # of visis
+t3 <- t2 %>%
+  group_by(Unique_member_identifier)%>%
   arrange(Unique_member_identifier)%>%
   summarise(tot=n(),count=n_distinct(BrandCode))%>%
-  filter(tot>5)%>%
-  filter(count>3)%>%
-  na.omit()
+  filter(tot>2)%>%
+  filter(count>2)%>%
+  na.omit() %>%
+  arrange(Unique_member_identifier)#7079 collectors left 
 
 #distribution of all transactions
 #Create a new column with the total number of transactions by each customer for each cara partner
-t3 <- group_by(t1,Unique_member_identifier,BrandCode)%>%
+t4 <- t2 %>%
+  group_by(Unique_member_identifier,BrandCode)%>%
   arrange(Unique_member_identifier)%>%
   na.omit()%>%
   summarise(each=n())
@@ -150,7 +156,7 @@ group_number = (function(){i = 0; function() i <<- i+1 })()
 group_number2 = (function(){i = 0; function() i <<- i+1 })()
 
 #creates the ratings file
-ratings<-inner_join(t3,t2,by="Unique_member_identifier")%>%
+ratings <-inner_join(t4,t3,by="Unique_member_identifier")%>%
   #creates a column called "rating" which essentially gives us the preference a customer has for each retailer
   mutate(rating=round(each/tot*10,digits=2))%>%
   #arranged by UMI to check something
@@ -164,16 +170,19 @@ ratings<-inner_join(t3,t2,by="Unique_member_identifier")%>%
   group_by(BrandCode) %>% 
   mutate(item = group_number2())
 
+#visualize_ratings(ratings_table = ratings)
+
 #mutate(user = match(Unique_member_identifier, unique(Unique_member_identifier)),item = match(BrandCode, unique(BrandCode)))
 
-#Start building recommender engine
 
-install.packages("recommenderlab")
-install.packages("recosystem")
+#-----Start building recommender engine-----
+
+#install.packages("recommenderlab")
+#install.packages("recosystem")
 
 library(devtools)
-install_github(repo = "SlopeOne", username = "tarashnot")
-install_github(repo = "SVDApproximation", username = "tarashnot")
+#install_github(repo = "SlopeOne", username = "tarashnot")
+#install_github(repo = "SVDApproximation", username = "tarashnot")
 
 library(recommenderlab)
 library(recosystem)
@@ -193,9 +202,10 @@ sparse_ratings <- sparseMatrix(i = ratings$user, j = ratings$item, x = ratings$r
 real_ratings <- new("realRatingMatrix", data = sparse_ratings)
 real_ratings
 
+#-----POPULAR MODEL-----#
 model <- Recommender(real_ratings, method = "POPULAR", param=list(normalize = "center"))
 
-prediction <- predict(model, real_ratings[1:5], type="ratings")
+prediction <- predict(model, real_ratings[1:9], type="ratings")
 as(prediction, "matrix")[,1:9]
 #max of [1:9]
 
@@ -207,12 +217,15 @@ model <- Recommender(getData(e, "train"), "POPULAR")
 prediction <- predict(model, getData(e, "known"), type="ratings")
 
 rmse_popular <- calcPredictionAccuracy(prediction, getData(e, "unknown"))[1]
-rmse_popular
+rmse_popular #Popular-2.56
 
-#CF - User Based
+
+
+
+#-----CF-USER BASED-----#
 
 model <- Recommender(real_ratings, method = "UBCF", 
-                    param=list(normalize = "center", method="Cosine", nn=50))
+                     param=list(normalize = "center", method="Cosine", nn=50))
 
 model <- Recommender(real_ratings, method = "UBCF", 
                      param=list(normalize = "center", method="Jaccard", nn=50))
@@ -232,36 +245,61 @@ set.seed(1)
 prediction <- predict(model, getData(e, "known"), type="ratings")
 
 rmse_ubcf <- calcPredictionAccuracy(prediction, getData(e, "unknown"))[1]
-rmse_ubcf
+rmse_ubcf 
+#Cosine-2.66. Jaccard-2.644. Pearson-2.578
 
-#recosystem
 
-data(ratings)
+
+
+
+
+
+
+#-----RECOSYSTEM-----#
+ratings_example <- data(ratings)
+
+ratings_reco <- ratings %>%
+  arrange(item) %>%
+  ungroup() %>%
+  select(user, item, rating)
+
+ratings_reco <- as.data.table(ratings_reco)
 
 set.seed(1)
-in_train <- rep(TRUE, nrow(ratings))
-in_train[sample(1:nrow(ratings), size = round(0.2 * length(unique(ratings$user)), 0) * 5)] <- FALSE
+in_train <- rep(TRUE, nrow(ratings_reco))
+in_train[sample(1:nrow(ratings_reco), size = round(0.2 * length(unique(ratings_reco$user)), 0) * 5)] <- FALSE
 
-ratings_train <- ratings[(in_train)]
-ratings_test <- ratings[(!in_train)]
+ratings_train <- ratings_reco[(in_train)]
+ratings_test <- ratings_reco[(!in_train)]
 
 write.table(ratings_train, file = "trainset.txt", sep = " ", row.names = FALSE, col.names = FALSE)
 write.table(ratings_test, file = "testset.txt", sep = " ", row.names = FALSE, col.names = FALSE)
 
 r = Reco()
 
-opts <- r$tune("trainset.txt", opts = list(dim = c(1:20), lrate = c(0.05),
-                                           nthread = 4, cost = c(0), niter = 200, nfold = 10, verbose = FALSE))
+#this option runs too slowly
+#opts <- r$tune(data_file("trainset.txt"), opts = list(dim = c(1:20), lrate = c(0.05),
+#                                                      nthread = 4, costp_l1 = c(0, 0.1),costp_l2 = c(0.01, 0.1),
+#                                                      costq_l1 = c(0, 0.1), niter = 200, nfold = 10, verbose = FALSE))
 
-r$train("trainset.txt", opts = c(opts$min, nthread = 4, niter = 500, verbose = FALSE))
+opts <- r$tune(data_file("trainset.txt"), opts = list(dim      = c(10L, 20L),
+                                                      costp_l1 = c(0, 0.1),
+                                                      costp_l2 = c(0.01, 0.1),
+                                                      costq_l1 = c(0, 0.1),
+                                                      costq_l2 = c(0.01, 0.1),
+                                                      lrate    = c(0.01, 0.1))
+)
+
+r$train(data_file("trainset.txt"), opts = c(opts$min, nthread = 4, niter = 500, verbose = FALSE))
 
 outfile = tempfile()
 
-r$predict("testset.txt", outfile)
+r$predict(data_file("trainset.txt"), out_file("predict.txt"))
 
 scores_real <- read.table("testset.txt", header = FALSE, sep = " ")$V3
 scores_pred <- scan(outfile)
 
 rmse_mf <- sqrt(mean((scores_real-scores_pred) ^ 2))
 
-rmse_mf
+rmse_mf #2.43
+
