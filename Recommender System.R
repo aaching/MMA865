@@ -76,6 +76,27 @@ SP_Source = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 # 3-RMSE added to each result to compare
 # 4-checked for data quality. Looks good.. but simply too few people are active enough at Cara for good data
 
+#---Text Manipulation---#
+
+points = SP_Points %>%
+  mutate(ex_transactiondescription = gsub('\\\\d', '',ex_transactiondescription)) %>% # numbers
+  mutate(ex_transactiondescription = gsub('[-#\'\\._/]', '',ex_transactiondescription)) %>% # special characters
+  mutate(ex_transactiondescription = gsub('( AB | BC | MB| NB| NL| NS | NT | NU | ON | PE | QC | SK | YT)', '',ex_transactiondescription)) %>% #provinces
+  mutate(ex_transactiondescription = gsub(' QTH', '',ex_transactiondescription)) %>% # Not sure what this is, but I saw it
+  mutate(ex_transactiondescription = gsub('MCDONALDS Q', 'MCDONALDS',ex_transactiondescription)) %>%
+  mutate(ex_transactiondescription = gsub('WENDYS QR', 'WENDYS',ex_transactiondescription)) %>%
+  mutate(ex_transactiondescription = gsub('(TORONTO|VANCOUVER|OTTAWA|BRAMPTON|IRVING|LONDON|SCARBOROUGH|BURNABY|MISSISSAUGA)', '',ex_transactiondescription)) %>% # Big city names
+  mutate(ex_transactiondescription = gsub('CGCTIM HORTONS', 'TIM HORTONS',ex_transactiondescription)) %>%
+  mutate(ex_transactiondescription = gsub('TIM HORTONS QPS', 'TIM HORTONS',ex_transactiondescription)) %>%
+  mutate(ex_transactiondescription = gsub('WAL-MART SUPERCENTER', 'WAL-MART',ex_transactiondescription)) %>%
+  mutate(ex_transactiondescription = gsub(' +', ' ',ex_transactiondescription))%>% # Two or more spaces get turned into one
+  filter(ex_sourceid != 7766,points>0) #Removing some points that seemed irrelevant
+
+# Lets see some of the top merchants
+points %>%
+  group_by(ex_transactiondescription) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
 
 #Create Universe 1, which essentially aggregates all the customer dimensions we care about (Account Balance, Enrollment metrics and Attributes)
 universe1 <- SP_AccountBalance %>%
@@ -302,4 +323,5 @@ scores_pred <- scan(outfile)
 rmse_mf <- sqrt(mean((scores_real-scores_pred) ^ 2))
 
 rmse_mf #2.43
+
 
