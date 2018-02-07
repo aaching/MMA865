@@ -77,27 +77,123 @@ SP_Source = fread(paste(in_path, file_name, sep=""), sep=",", header=TRUE)
 # 4-checked for data quality. Looks good.. but simply too few people are active enough at Cara for good data
 
 #---Text Manipulation---#
-
-points = SP_Points %>%
-  mutate(ex_transactiondescription = gsub('\\\\d', '',ex_transactiondescription)) %>% # numbers
-  mutate(ex_transactiondescription = gsub('[-#\'\\._/]', '',ex_transactiondescription)) %>% # special characters
-  mutate(ex_transactiondescription = gsub('( AB | BC | MB| NB| NL| NS | NT | NU | ON | PE | QC | SK | YT)', '',ex_transactiondescription)) %>% #provinces
-  mutate(ex_transactiondescription = gsub(' QTH', '',ex_transactiondescription)) %>% # Not sure what this is, but I saw it
-  mutate(ex_transactiondescription = gsub('MCDONALDS Q', 'MCDONALDS',ex_transactiondescription)) %>%
-  mutate(ex_transactiondescription = gsub('WENDYS QR', 'WENDYS',ex_transactiondescription)) %>%
-  mutate(ex_transactiondescription = gsub('(TORONTO|VANCOUVER|OTTAWA|BRAMPTON|IRVING|LONDON|SCARBOROUGH|BURNABY|MISSISSAUGA)', '',ex_transactiondescription)) %>% # Big city names
-  mutate(ex_transactiondescription = gsub('CGCTIM HORTONS', 'TIM HORTONS',ex_transactiondescription)) %>%
-  mutate(ex_transactiondescription = gsub('TIM HORTONS QPS', 'TIM HORTONS',ex_transactiondescription)) %>%
-  mutate(ex_transactiondescription = gsub('WAL-MART SUPERCENTER', 'WAL-MART',ex_transactiondescription)) %>%
-  mutate(ex_transactiondescription = gsub(' +', ' ',ex_transactiondescription))%>% # Two or more spaces get turned into one
-  filter(ex_sourceid != 7766,points>0) #Removing some points that seemed irrelevant
-
-# Lets see some of the top merchants
-points %>%
-  group_by(ex_transactiondescription) %>%
-  summarise(n = n()) %>%
-  arrange(desc(n))
-
+  
+  points1 = SP_Points %>% filter(ex_sourceid ==0 | pointtypeid ==1282,points>0) #Removing some points that seemed irrelevant
+  
+  points2 = points1 %>%
+    mutate(ex_transactiondescription = gsub('\\\\d', '',ex_transactiondescription)) %>% # numbers
+    mutate(ex_transactiondescription = gsub('[-#\'\\._/]', '',ex_transactiondescription)) %>% # special characters
+    mutate(ex_transactiondescription = gsub('( AB | BC | MB| NB| NL| NS | NT | NU | ON | PE | QC | SK | YT)', '',ex_transactiondescription)) %>% #provinces
+    mutate(ex_transactiondescription = gsub(' QTH', '',ex_transactiondescription)) %>% # Not sure what this is, but I saw it
+    mutate(ex_transactiondescription = gsub('MCDONALDS Q', 'MCDONALDS',ex_transactiondescription)) %>%
+    mutate(ex_transactiondescription = gsub('WENDYS QR', 'WENDYS',ex_transactiondescription)) %>%
+    mutate(ex_transactiondescription = gsub('(TORONTO|VANCOUVER|OTTAWA|BRAMPTON|IRVING|LONDON|SCARBOROUGH|BURNABY|MISSISSAUGA)', '',ex_transactiondescription)) %>% # Big city names
+    mutate(ex_transactiondescription = gsub('CGCTIM HORTONS', 'TIM HORTONS',ex_transactiondescription)) %>%
+    mutate(ex_transactiondescription = gsub('TIM HORTONS QPS', 'TIM HORTONS',ex_transactiondescription)) %>%
+    mutate(ex_transactiondescription = gsub('WAL-MART SUPERCENTER', 'WAL-MART',ex_transactiondescription)) %>%
+    mutate(ex_transactiondescription = gsub(' +', ' ',ex_transactiondescription))%>% # Two or more spaces get turned into one
+    mutate(ex_transactiondescription = gsub(' QPS', '',ex_transactiondescription)) %>% # Not sure what this
+    mutate(ex_transactiondescription = gsub("SHOPPERS DRUG MART\\s\\d+|SHOPPERSDRUGMART.+|SHOPPERS DRUG MART.+", "SHOPPERS DRUG MART",ex_transactiondescription)) %>% # Not sure what this
+    mutate(ex_transactiondescription = gsub("APL\\*\\sITUNESCOMBILL.+", "APL* ITUNESCOMBILL",ex_transactiondescription))%>% # Not sure what this
+    mutate(ex_transactiondescription = gsub("AMAZON.+", "AMAZON",ex_transactiondescription)) %>% # Not sure what this
+    mutate(ex_transactiondescription = gsub("VESTA\\s\\*CHATR.+", "VESTA *CHATR",ex_transactiondescription)) %>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('TIM HORTONS.+', 'TIM HORTONS',ex_transactiondescription)) %>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('NETFLIXCOM.+', 'NETFLIXCOM',ex_transactiondescription)) %>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('MCDONALDS.+|MCDONALD|MCDONALDS .+|MCDONALD .+', 'MCDONALDS',ex_transactiondescription))%>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('Amazon .+|Amazonca .+', 'AMAZON',ex_transactiondescription))%>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('UBER BV .+', 'UBER',ex_transactiondescription))%>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('UBER EATS .+', 'UBER EATS',ex_transactiondescription))%>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('REAL CDN .+ |REAL CANADIAN .+', 'REAL CANADIAN SUPERSTORE',ex_transactiondescription))%>% # Not sure what this
+    mutate(ex_transactiondescription = gsub('GOOGLE .+', 'GOOGLE',ex_transactiondescription)) %>%# Not sure what this
+  mutate(ex_transactiondescription = gsub('WALMART\\s\\d+|WALMART\\s.+', 'WALMART',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('ATLANTIC SUPERSTORE .+', 'ATLANTIC SUPERSTORE',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('SOBEYS .+', 'SOBEYS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('METRO .+', 'SOBEYS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('PETROCAN.+', 'PETROCANADA',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('COSTCO .+', 'COSTCO',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('WENDYS .+', 'WENDYS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('LONGOS .+', 'LONGOS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('COMPASS .+', 'COMPASS-METRO',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('NO FRILLS .+|NOFRILLS .+', 'NO FRILLS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('THE BEER STORE .+', 'THE BEER STORE',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('.+ CIRCLE K', 'CIRCLE K',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('.+ MACS .+', 'MACS CONVENIENCE',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('PIZZA PIZZA.+', 'PIZZA',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('STARBUCKS .+', 'STARBUCKS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('SUBWAY .+', 'SUBWAY',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('LOBLAW .+', 'LOBLAW',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('ZEHRS .+', 'ZEHRS',ex_transactiondescription)) %>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('CANADIAN TIRE \\d+', 'CANADIAN TIRE',ex_transactiondescription))%>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('7ELEVEN \\d+', '7ELEVEN',ex_transactiondescription))%>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('PHARMA PLUS .+', 'PHARMA PLUS',ex_transactiondescription))%>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('PHARMAPRIX \\d+', 'PHARMAPRIX',ex_transactiondescription))%>%# Not sure what this
+    mutate(ex_transactiondescription = gsub('FRESHCO \\d+', 'FRESHCO',ex_transactiondescription))%>%# Not sure what this
+    
+    mutate(ex_transactiondescription = gsub('LITTLE CAESARS PIZZA', 'LITTLE CAESARS',ex_transactiondescription))# Not sure what this
+    
+    #mutate(ex_transactiondescription = gsub("SHOPPERS DRUG MART\\s\\d", "SHOPPERS DRUG MART",ex_transactiondescription)) %>% # Not sure what this
+    #mutate(ex_transactiondescription = gsub('TIM HORTONS \d+', 'TIM HORTONS',ex_transactiondescription)) %>% # Not sure what this
+    #filter(ex_sourceid ==0,points>0) #Removing some points that seemed irrelevant
+  
+  # looking at the top x occurrances 
+  detach("package:plyr", unload=TRUE) 
+  
+  # Creates a data table with only the top 150 merchants by transaction frequency
+  points3 =points2%>%
+    group_by(ex_transactiondescription) %>%
+    summarise(n = n()) %>%
+    arrange(desc(n))%>%
+    slice(1:150) #grab the top 150 merchants
+  
+  #Modifies the merchant column so that CARA partner names show up 
+  points2= points2 %>%
+    inner_join(points3,by="ex_transactiondescription") %>%
+    left_join(SP_DimProxyLocation[!duplicated(SP_DimProxyLocation$LocationCode),], by = c("ex_sourceid" = "LocationCode"))
+    points2<-select(points2,Unique_member_identifier,points,ex_sourceid,pointdt,pointtypeid,ex_transactiondescription,BrandCode)
+  points2<- mutate(points2,merchant=paste(points2$ex_transactiondescription,points2$BrandCode))
+  points2<- mutate(points2,merchant = gsub(' NA', '',merchant))
+  points2<- mutate(points2,merchant = gsub('CARA Points Earned ', '',merchant))
+  
+  #Filters out members with transactions between 100-200. This needs a bit of work to define what that transaction range should be. 
+  points4<- points2%>%
+    group_by(Unique_member_identifier)%>%
+    summarise(n=n())%>%
+    arrange(desc(n))%>%
+    filter(n>=100,n<=200)
+    #write_csv("points4.csv")
+  
+  #Add back merchants into the table
+  points5 <- points4 %>% 
+    inner_join(points2,by="Unique_member_identifier")%>%
+    arrange(Unique_member_identifier)%>%
+    select(Unique_member_identifier,n,merchant)
+    #write_csv("points4.csv")
+  
+  #Gets the number of transactions at each merchant for each customer
+  points6 <- points5 %>%
+    group_by(Unique_member_identifier,merchant)%>%
+    arrange(Unique_member_identifier)%>%
+    summarise(merch_n=n())
+  
+  group_number = (function(){i = 0; function() i <<- i+1 })()
+  group_number2 = (function(){i = 0; function() i <<- i+1 })()
+  
+  #Builds the final ratings matrix
+  ratings <- points5 %>%
+    inner_join(points6, by="Unique_member_identifier")%>%
+    mutate(rating=round(merch_n/n*10,digits=2))%>%
+    #arranged by UMI to check something
+    arrange(Unique_member_identifier)%>%
+    #select only the columns needed
+    select(Unique_member_identifier,merchant.y,rating)%>%
+    #created a new column with user ID's in descending order
+    group_by(Unique_member_identifier) %>% 
+    mutate(user = group_number())%>%
+    #created a new column with brands in descending order
+    group_by(merchant.y) %>% 
+    mutate(item = group_number2())
+  
+#--Universe Creation--#
 #Create Universe 1, which essentially aggregates all the customer dimensions we care about (Account Balance, Enrollment metrics and Attributes)
 universe1 <- SP_AccountBalance %>%
   inner_join(SP_FactEnrollment, by = "Unique_member_identifier") %>%
