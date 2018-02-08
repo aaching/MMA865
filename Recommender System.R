@@ -108,9 +108,8 @@ universe3 <- universe2 %>%
   #keep only the UMI column
   select(Unique_member_identifier)
   #---Text Manipulation---#
-  
-  
-  points1 = SP_Points %>% inner_join(universe3, by="Unique_member_identifier")%>%
+
+    points1 = SP_Points %>% inner_join(universe3, by="Unique_member_identifier")%>%
     filter(ex_sourceid ==0 | pointtypeid ==1282,points>0) #Removing some points that seemed irrelevant
   
   points2 = points1 %>%
@@ -203,7 +202,8 @@ universe3 <- universe2 %>%
   points6 <- points5 %>%
     group_by(Unique_member_identifier,merchant)%>%
     arrange(Unique_member_identifier)%>%
-    summarise(merch_n=n())
+    summarise(merch_n=n())%>%
+    filter(merch_n=3)
   
   group_number = (function(){i = 0; function() i <<- i+1 })()
   group_number2 = (function(){i = 0; function() i <<- i+1 })()
@@ -223,7 +223,8 @@ universe3 <- universe2 %>%
     #created a new column with brands in descending order
     group_by(merchant.y) %>% 
     mutate(item = group_number2())%>%
-    distinct(Unique_member_identifier,n,merchant.y,rating)
+    distinct(Unique_member_identifier,n,merchant.y,rating,user,item)
+    write.csv("ratings.csv")
   
 #--t1 build--#
 
